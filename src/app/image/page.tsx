@@ -24,6 +24,7 @@ export default function ImagePage() {
   } = usePaidService("image");
   const {
     botBalance,
+    apayBalance,
     usdtBalance,
     bousdtBalance,
     loading: balanceLoading,
@@ -62,6 +63,7 @@ export default function ImagePage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        apayBalance={apayBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
         loading={balanceLoading}

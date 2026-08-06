@@ -1,80 +1,90 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { formatUnits } from "viem";
-import {
-  publicClientBotChain,
-  publicClientBotChainTestnet,
-} from "@/lib/chains";
+import { createPublicClient, formatUnits, http } from "viem";
+import { botChainTestnet, botChain } from "@/lib/chains";
 import { TOKENS, ERC20_ABI } from "@/lib/tokens";
 
-export function useBalance(address: string | null, chainId: number = 968) {
+export interface BalanceState {
+  botBalance: string;
+  apayBalance: string;
+  usdtBalance: string;
+  bousdtBalance: string;
+  isLoading: boolean;
+  loading: boolean;
+  refetch: () => Promise<void>;
+}
+
+export function useBalance(address: string | null | undefined, _chainId?: number): BalanceState {
   const [botBalance, setBotBalance] = useState<string>("0.00");
+  const [apayBalance, setApayBalance] = useState<string>("0.00");
   const [usdtBalance, setUsdtBalance] = useState<string>("0.00");
   const [bousdtBalance, setBousdtBalance] = useState<string>("0.00");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchBalances = useCallback(async () => {
-    if (!address) return;
-    setLoading(true);
+    if (!address || typeof window === "undefined") return;
+
+    setIsLoading(true);
+
     try {
-      const isMainnet = chainId === 677;
-      const botClient = isMainnet ? publicClientBotChain : publicClientBotChainTestnet;
+      const isMainnet = window.location.hostname === "agentpay.ai";
+      const chain = isMainnet ? botChain : botChainTestnet;
       const tokenConfig = isMainnet ? TOKENS.botChainMainnet : TOKENS.botChainTestnet;
 
-      const [botRaw, usdtRaw, bousdtRaw] = await Promise.all([
-        botClient.getBalance({ address: address as `0x${string}` }).catch(() => BigInt(0)),
-        botClient
-          .readContract({
-            address: tokenConfig.USDT,
-            abi: ERC20_ABI,
-            functionName: "balanceOf",
-            args: [address as `0x${string}`],
-          })
-          .catch(() => BigInt(0)),
+      const client = createPublicClient({
+        chain,
+        transport: http(),
+      });
+
+      const [botRaw, apayRaw, usdtRaw, bousdtRaw] = await Promise.all([
+        client.getBalance({ address: address as `0x${string}` }),
+        client.readContract({
+          address: tokenConfig.APAY,
+          abi: ERC20_ABI,
+          functionName: "balanceOf",
+          args: [address as `0x${string}`],
+        }),
+        client.readContract({
+          address: tokenConfig.USDT,
+          abi: ERC20_ABI,
+          functionName: "balanceOf",
+          args: [address as `0x${string}`],
+        }),
         isMainnet && TOKENS.botChainMainnet.BOUSDT
-          ? botClient
-              .readContract({
-                address: TOKENS.botChainMainnet.BOUSDT,
-                abi: ERC20_ABI,
-                functionName: "balanceOf",
-                args: [address as `0x${string}`],
-              })
-              .catch(() => BigInt(0))
+          ? client.readContract({
+              address: TOKENS.botChainMainnet.BOUSDT,
+              abi: ERC20_ABI,
+              functionName: "balanceOf",
+              args: [address as `0x${string}`],
+            })
           : Promise.resolve(BigInt(0)),
       ]);
 
-      setBotBalance(Number(formatUnits(botRaw, 18)).toFixed(2));
+      setBotBalance(Number(formatUnits(botRaw, 18)).toFixed(4));
+      setApayBalance(Number(formatUnits(apayRaw, 18)).toFixed(2));
       setUsdtBalance(Number(formatUnits(usdtRaw, 6)).toFixed(2));
       setBousdtBalance(Number(formatUnits(bousdtRaw, 6)).toFixed(2));
     } catch (err) {
-      console.error("Error reading balances:", err);
+      console.error("[useBalance] Error fetching balances:", err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [address, chainId]);
+  }, [address]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (address) {
-        fetchBalances();
-      }
-    }, 0);
-    const interval = setInterval(() => {
-      if (address) fetchBalances();
-    }, 15000);
-
-    return () => {
-      clearTimeout(timer);
-      clearInterval(interval);
-    };
-  }, [address, fetchBalances]);
+    fetchBalances();
+    const interval = setInterval(fetchBalances, 15000);
+    return () => clearInterval(interval);
+  }, [fetchBalances]);
 
   return {
     botBalance,
+    apayBalance,
     usdtBalance,
     bousdtBalance,
-    loading,
+    isLoading,
+    loading: isLoading,
     refetch: fetchBalances,
   };
 }

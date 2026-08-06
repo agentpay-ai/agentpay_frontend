@@ -33,11 +33,12 @@ export default function ChatPage() {
   } = usePaidService("chat");
   const {
     botBalance,
+    apayBalance,
     usdtBalance,
     bousdtBalance,
     loading: balanceLoading,
     refetch,
-  } = useBalance(address, currentChainId);
+  } = useBalance(address);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,6 +98,7 @@ export default function ChatPage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        apayBalance={apayBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
         loading={balanceLoading}

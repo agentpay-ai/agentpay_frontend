@@ -22,6 +22,7 @@ export default function Home() {
   } = useWallet();
   const {
     botBalance,
+    apayBalance,
     usdtBalance,
     bousdtBalance,
     loading: balanceLoading,
@@ -38,6 +39,7 @@ export default function Home() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        apayBalance={apayBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
         loading={balanceLoading}

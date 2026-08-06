@@ -5,6 +5,7 @@ import { ShieldCheck, Loader2, DollarSign, X, Coins, Wallet } from "lucide-react
 import {
   BUDGET_PRESETS_USD,
   PAYMENT_ASSET,
+  formatApay,
   formatUsdt,
 } from "@/lib/pricing";
 
@@ -93,17 +94,17 @@ export function PaymentModal({
   const validationError = useMemo(() => {
     if (!needsTopUp) return null;
     if (!canAfford) {
-      return `Insufficient ${PAYMENT_ASSET} balance. Need at least ${formatUsdt(minAuth)}, wallet has ${formatUsdt(balanceUsd)}.`;
+      return `Insufficient ${PAYMENT_ASSET} balance. Need at least ${formatApay(minAuth)}, wallet has ${formatApay(balanceUsd)}.`;
     }
     if (!touched && amountInput === "") return null;
     if (!Number.isFinite(grantAmount) || grantAmount <= 0) {
       return "Enter an amount greater than zero.";
     }
     if (grantAmount + 1e-9 < minAuth) {
-      return `Minimum for this request is ${formatUsdt(minAuth)}.`;
+      return `Minimum for this request is ${formatApay(minAuth)}.`;
     }
     if (grantAmount - 1e-9 > maxAuth) {
-      return `Cannot exceed your wallet balance of ${formatUsdt(maxAuth)}.`;
+      return `Cannot exceed your wallet balance of ${formatApay(maxAuth)}.`;
     }
     return null;
   }, [
@@ -192,7 +193,7 @@ export function PaymentModal({
           </div>
           <div className="flex justify-between text-xs text-slate-400">
             <span>This request</span>
-            <span className="font-medium text-emerald-400">{formatUsdt(priceUsd)}</span>
+            <span className="font-medium text-emerald-400">{formatApay(priceUsd)}</span>
           </div>
           <div className="flex justify-between text-xs text-slate-400">
             <span>Remaining authorized</span>
@@ -201,7 +202,7 @@ export function PaymentModal({
                 needsTopUp ? "text-rose-300" : "text-emerald-300"
               }`}
             >
-              {formatUsdt(remainingUsd)}
+              {formatApay(remainingUsd)}
             </span>
           </div>
           <div className="flex justify-between text-xs text-slate-400 pt-2 border-t border-slate-900">
@@ -209,7 +210,7 @@ export function PaymentModal({
               <Wallet className="w-3 h-3" />
               Wallet {PAYMENT_ASSET}
             </span>
-            <span className="font-medium text-emerald-300">{formatUsdt(balanceUsd)}</span>
+            <span className="font-medium text-emerald-300">{formatApay(balanceUsd)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm font-semibold text-white">Payment asset</span>
@@ -227,8 +228,8 @@ export function PaymentModal({
             </p>
             <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
               Enter any amount from{" "}
-              <span className="text-slate-400">{formatUsdt(minAuth)}</span> up to your full
-              balance of <span className="text-slate-400">{formatUsdt(maxAuth)}</span>. After
+              <span className="text-slate-400">{formatApay(minAuth)}</span> up to your full
+              balance of <span className="text-slate-400">{formatApay(maxAuth)}</span>. After
               this, tool calls continue without another prompt until the budget runs out.
             </p>
           </div>
@@ -283,8 +284,8 @@ export function PaymentModal({
             )}
 
             <div className="flex justify-between text-[10px] text-slate-500">
-              <span>Min {formatUsdt(minAuth)}</span>
-              <span>Max {formatUsdt(maxAuth)}</span>
+              <span>Min {formatApay(minAuth)}</span>
+              <span>Max {formatApay(maxAuth)}</span>
             </div>
           </div>
 
@@ -302,7 +303,7 @@ export function PaymentModal({
                       : "bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600"
                   } disabled:opacity-40`}
                 >
-                  {formatUsdt(preset)}
+                  {formatApay(preset)}
                 </button>
               ))}
               <button
@@ -315,7 +316,7 @@ export function PaymentModal({
                     : "bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600"
                 } disabled:opacity-40`}
               >
-                Just this ({formatUsdt(minAuth)})
+                Just this ({formatApay(minAuth)})
               </button>
               <button
                 type="button"
@@ -371,7 +372,7 @@ export function PaymentModal({
             ) : (
               <span>
                 Allow{" "}
-                {grantAmount > 0 ? formatUsdt(roundUsd(grantAmount)) : formatUsdt(minAuth)}
+                {grantAmount > 0 ? formatApay(roundUsd(grantAmount)) : formatApay(minAuth)}
               </span>
             )}
           </button>

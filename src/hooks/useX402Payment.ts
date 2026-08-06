@@ -207,8 +207,8 @@ function chainFromCaip(network: string): {
   };
 }
 
-function usdtForChain(chainId: number): `0x${string}` {
-  return chainId === 677 ? TOKENS.botChainMainnet.USDT : TOKENS.botChainTestnet.USDT;
+function apayForChain(chainId: number): `0x${string}` {
+  return chainId === 677 ? TOKENS.botChainMainnet.APAY : TOKENS.botChainTestnet.APAY;
 }
 
 async function readChainId(ethereum: EthereumProvider): Promise<number> {
@@ -360,7 +360,7 @@ async function payExactUsdtTransfer(
     throw new Error("Invalid payment amount in 402 challenge.");
   }
 
-  const asset = accept.asset || usdtForChain(target.chainId);
+  const asset = accept.asset || apayForChain(target.chainId);
 
   const walletClient = createWalletClient({
     account,

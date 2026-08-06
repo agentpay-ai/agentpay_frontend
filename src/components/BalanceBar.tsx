@@ -6,9 +6,10 @@ import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown, Copy, Check } from 
 interface BalanceBarProps {
   address: string | null;
   botBalance: string;
+  apayBalance?: string;
   usdtBalance?: string;
   bousdtBalance?: string;
-  /** Pre-authorized USDT spending budget remaining (formatted, e.g. "$1.00 USDT"). */
+  /** Pre-authorized APAY spending budget remaining (formatted, e.g. "10.0 $APAY"). */
   spendingBudget?: string | null;
   loading: boolean;
   onRefresh: () => void;
@@ -16,17 +17,13 @@ interface BalanceBarProps {
   currentChainId?: number;
   isTestnet?: boolean;
   onSwitchNetwork?: (isTestnet: boolean) => void;
-  /**
-   * Whether to offer the network switcher. Defaults to false so a caller that forgets to pass
-   * it fails closed — a missing switcher in dev is obvious and harmless, whereas an unintended
-   * switcher in production is silent and wrong.
-   */
   allowNetworkSwitch?: boolean;
 }
 
 export function BalanceBar({
   address,
   botBalance,
+  apayBalance = "0.00",
   usdtBalance = "0.00",
   bousdtBalance = "0.00",
   spendingBudget = null,
@@ -86,7 +83,7 @@ export function BalanceBar({
           )}
         </div>
 
-        {/* Network indicator — interactive only where switching is permitted */}
+        {/* Network indicator */}
         <div className="relative">
           {allowNetworkSwitch ? (
             <button
@@ -118,17 +115,17 @@ export function BalanceBar({
             </div>
           )}
 
-          {menuOpen && allowNetworkSwitch && (
-            <div className="absolute right-0 mt-1.5 w-52 bg-slate-900 border border-purple-800/60 rounded-xl shadow-xl z-50 p-1 space-y-1">
-              <div className="px-3 py-1.5 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-800">
-                Select Network
+          {menuOpen && allowNetworkSwitch && onSwitchNetwork && (
+            <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-purple-900/60 rounded-lg shadow-xl py-1 z-50 text-xs">
+              <div className="px-3 py-1.5 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+                Switch Network
               </div>
               <button
                 onClick={() => {
+                  onSwitchNetwork(true);
                   setMenuOpen(false);
-                  onSwitchNetwork?.(true);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg transition ${
+                className={`w-full text-left px-3 py-2 flex items-center justify-between transition ${
                   isTestnet
                     ? "bg-purple-900/60 text-purple-200 font-semibold"
                     : "text-slate-300 hover:bg-slate-800"
@@ -142,10 +139,10 @@ export function BalanceBar({
               </button>
               <button
                 onClick={() => {
+                  onSwitchNetwork(false);
                   setMenuOpen(false);
-                  onSwitchNetwork?.(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-lg transition ${
+                className={`w-full text-left px-3 py-2 flex items-center justify-between transition ${
                   !isTestnet
                     ? "bg-purple-900/60 text-purple-200 font-semibold"
                     : "text-slate-300 hover:bg-slate-800"
@@ -164,32 +161,24 @@ export function BalanceBar({
 
       <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 overflow-x-auto no-scrollbar">
         <div className="flex items-center space-x-1.5 shrink-0">
-          {/* USDT is the only payment asset — surface it first */}
+          {/* APAY is the primary payment asset */}
           <div
-            className="flex items-center space-x-1 bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-800/60"
-            title="Wallet USDT balance — the only asset charged for AI tools"
+            className="flex items-center space-x-1 bg-purple-950/70 px-2 py-0.5 rounded-full border border-purple-700/60"
+            title="Wallet $APAY balance — native utility token for AI tools"
           >
-            <Coins className="w-3 h-3 text-emerald-400" />
-            <span className="font-semibold text-emerald-300 text-[11px]">
-              ${usdtBalance} USDT
+            <Coins className="w-3 h-3 text-purple-400" />
+            <span className="font-semibold text-purple-300 text-[11px]">
+              {apayBalance} $APAY
             </span>
           </div>
 
           {spendingBudget && (
             <div
               className="flex items-center space-x-1 bg-amber-950/50 px-2 py-0.5 rounded-full border border-amber-700/50"
-              title="Pre-authorized USDT spending budget for AgentPay tools"
+              title="Pre-authorized APAY spending budget for AgentPay tools"
             >
               <span className="font-semibold text-amber-300 text-[11px]">
                 Budget {spendingBudget}
-              </span>
-            </div>
-          )}
-
-          {!isTestnet && (
-            <div className="flex items-center space-x-1 bg-teal-950/50 px-2 py-0.5 rounded-full border border-teal-800/60">
-              <span className="font-semibold text-teal-300 text-[11px]">
-                ${bousdtBalance} BOUSDT
               </span>
             </div>
           )}
@@ -203,16 +192,16 @@ export function BalanceBar({
             </span>
           </div>
 
-          <div className="flex items-center space-x-1 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-700/50 text-[10px] text-amber-300 font-mono" title="x402 Micropayments settle USDT into the AgentPayRegistry Proxy Vault">
+          <div className="flex items-center space-x-1 bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-700/50 text-[10px] text-amber-300 font-mono" title="x402 Micropayments settle $APAY into the AgentPayRegistry Vault">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>Pay: USDT only</span>
+            <span>Pay: $APAY (EIP-3009)</span>
           </div>
         </div>
 
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="text-slate-400 hover:text-white transition disabled:opacity-50 p-1 shrink-0 ml-2"
+          className="text-slate-400 hover:text-white transition p-1 rounded hover:bg-slate-800 disabled:opacity-50"
           title="Refresh balances"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />

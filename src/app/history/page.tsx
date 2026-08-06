@@ -10,6 +10,7 @@ export default function HistoryPage() {
   const { address, currentChainId, isTestnet, disconnectWallet, switchOrAddBotChain } = useWallet();
   const {
     botBalance,
+    apayBalance,
     usdtBalance,
     bousdtBalance,
     loading: balanceLoading,
@@ -48,6 +49,7 @@ export default function HistoryPage() {
       <BalanceBar
         address={address}
         botBalance={botBalance}
+        apayBalance={apayBalance}
         usdtBalance={usdtBalance}
         bousdtBalance={bousdtBalance}
         loading={balanceLoading}
