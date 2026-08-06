@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AgentPay AI — Frontend
 
-## Getting Started
+> Next.js web app for the [AgentPay AI](https://agentpayfrontend.vercel.app) platform — pay-per-use AI powered by on-chain USDT payments on BotChain.
 
-First, run the development server:
+**Live Site:** https://agentpayfrontend.vercel.app  
+**Backend API:** https://agentpay-backend-eight.vercel.app  
+**GitHub Org:** https://github.com/agentpay-ai
+
+---
+
+## What it does
+
+AgentPay AI is a web app that lets users:
+
+- Connect their wallet (MetaMask / MiniPay / WalletConnect via Privy)
+- Chat with Claude AI, generate images, and get code completions
+- Pay per request in USDT on BotChain — no subscription, no account needed
+- Optionally deposit USDT once to get a prepaid session token for frictionless multi-request usage
+- View balance and session status in real time
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Wallet**: Privy + wagmi + viem
+- **Payments**: x402 client + USDT transfer on BotChain
+- **AI Backend**: [agentpay_backend](https://github.com/agentpay-ai/agentpay_backend) Express API
+- **Deployment**: Vercel
+
+---
+
+## Local Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/agentpay-ai/agentpay_frontend
+cd agentpay_frontend
+npm install
+cp .env.production.example .env.local   # fill in your values
+npm run dev                             # starts on http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL (default: `https://agentpay-backend-eight.vercel.app`) |
+| `NEXT_PUBLIC_PRIVY_APP_ID` | Privy app ID for wallet login |
+| `NEXT_PUBLIC_ENVIRONMENT` | `development` or `production` |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Pages
 
-To learn more about Next.js, take a look at the following resources:
+| Route | Description |
+|-------|-------------|
+| `/` | Landing / home |
+| `/chat` | Claude AI chat (payment-gated) |
+| `/code` | Code generation (payment-gated) |
+| `/image` | Image generation (payment-gated) |
+| `/history` | Request history |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Related
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Backend repo**: [agentpay-ai/agentpay_backend](https://github.com/agentpay-ai/agentpay_backend)
+- **Live API**: https://agentpay-backend-eight.vercel.app/health
