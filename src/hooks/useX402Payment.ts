@@ -17,7 +17,7 @@ export interface EthereumProvider {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
 }
 
-/** Header the API uses to accept a verified on-chain USDT transfer as payment. */
+/** Header the API uses to accept a verified on-chain USDT transfer as payment (legacy). */
 export const PAYMENT_TX_HEADER = "X-AgentPay-Payment-Tx";
 
 const BOTCHAIN_IDS = new Set([968, 677]);
@@ -45,6 +45,16 @@ interface PaymentAccept {
   asset: `0x${string}`;
   payTo: `0x${string}`;
   extra?: { name?: string; version?: string };
+}
+
+interface Eip3009Payload {
+  from: string;
+  to: string;
+  value: string;
+  validAfter: number;
+  validBefore: number;
+  nonce: string;
+  signature: string;
 }
 
 export interface PayRequestOptions {
@@ -316,7 +326,7 @@ async function ensureChain(
       );
     } else if (err.code === 4001) {
       throw new Error(
-        "Network switch rejected. Switch to BotChain to pay with USDT."
+        "Network switch rejected. Switch to BotChain to pay with APAY."
       );
     } else {
       try {
@@ -340,7 +350,93 @@ async function ensureChain(
 }
 
 /**
- * Pay exactly the 402 challenge amount with one on-chain USDT.transfer.
+ * Sign an EIP-3009 TransferWithAuthorization using eth_signTypedData_v4.
+ *
+ * This is a pure signature — no gas, no on-chain transaction from the user.
+ * The backend verifies the signature via BOF and the relayer settles on-chain.
+ */
+async function signEip3009Authorization(
+  ethereum: EthereumProvider,
+  accept: PaymentAccept,
+  account: `0x${string}`
+): Promise<Eip3009Payload> {
+  const target = chainFromCaip(accept.network);
+
+  // Random 32-byte nonce
+  const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
+  const nonce =
+    "0x" +
+    Array.from(nonceBytes)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+  const now = Math.floor(Date.now() / 1000);
+  const validAfter = now - 30;   // tolerate 30s clock skew
+  const validBefore = now + 300; // 5-minute validity window
+
+  const typedData = {
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+        { name: "verifyingContract", type: "address" },
+      ],
+      TransferWithAuthorization: [
+        { name: "from", type: "address" },
+        { name: "to", type: "address" },
+        { name: "value", type: "uint256" },
+        { name: "validAfter", type: "uint256" },
+        { name: "validBefore", type: "uint256" },
+        { name: "nonce", type: "bytes32" },
+      ],
+    },
+    domain: {
+      name: accept.extra?.name ?? "AgentPay Token",
+      version: accept.extra?.version ?? "1",
+      chainId: target.chainId,
+      verifyingContract: accept.asset,
+    },
+    primaryType: "TransferWithAuthorization",
+    message: {
+      from: account,
+      to: accept.payTo,
+      value: accept.amount, // atomic string from 402 challenge (e.g. "1000000000000000000")
+      validAfter: validAfter.toString(),
+      validBefore: validBefore.toString(),
+      nonce,
+    },
+  };
+
+  console.info(
+    `[agentpay] signing EIP-3009 auth → from=${account} to=${accept.payTo} amount=${accept.amount}`
+  );
+
+  const signature = (await withTimeout(
+    ethereum.request({
+      method: "eth_signTypedData_v4",
+      params: [account, JSON.stringify(typedData)],
+    }) as Promise<string>,
+    USER_ACTION_TIMEOUT_MS,
+    "Payment authorization signature"
+  )) as string;
+
+  console.info("[agentpay] EIP-3009 auth signed");
+
+  return {
+    from: account,
+    to: accept.payTo,
+    value: accept.amount,
+    validAfter,
+    validBefore,
+    nonce,
+    signature,
+  };
+}
+
+/**
+ * Legacy: pay with a raw on-chain ERC-20 transfer (kept as fallback for old servers).
+ * Not called by the primary flow anymore — EIP-3009 sign is used instead.
  */
 async function payExactUsdtTransfer(
   ethereum: EthereumProvider,
@@ -378,10 +474,6 @@ async function payExactUsdtTransfer(
     args: [accept.payTo, amount],
   });
 
-  console.info(
-    `[agentpay] pay-per-prompt USDT transfer → from=${account} to=${accept.payTo} amount=${amount.toString()}`
-  );
-
   const hash = await withTimeout(
     walletClient.sendTransaction({
       account,
@@ -391,10 +483,8 @@ async function payExactUsdtTransfer(
       value: BigInt(0),
     }),
     USER_ACTION_TIMEOUT_MS,
-    "USDT payment confirmation"
+    "APAY payment confirmation"
   );
-
-  console.info("[agentpay] USDT tx submitted", hash);
 
   const receipt = await withTimeout(
     publicClient.waitForTransactionReceipt({
@@ -403,14 +493,13 @@ async function payExactUsdtTransfer(
       timeout: RECEIPT_TIMEOUT_MS,
     }),
     RECEIPT_TIMEOUT_MS + 5_000,
-    "USDT payment receipt"
+    "APAY payment receipt"
   );
 
   if (receipt.status !== "success") {
-    throw new Error("USDT payment failed on-chain. No charge was completed.");
+    throw new Error("APAY payment failed on-chain. No charge was completed.");
   }
 
-  console.info("[agentpay] USDT payment confirmed", hash);
   return hash;
 }
 
@@ -442,10 +531,11 @@ export function useX402Payment() {
   const [txHash, setTxHash] = useState<string | null>(null);
 
   /**
-   * Pay-per-prompt flow (no prepaid deposits):
-   *  1. POST unpaid → 402 challenge (price / asset / payTo)
-   *  2. Wallet signs one USDT.transfer for that exact price
-   *  3. Retry with X-AgentPay-Payment-Tx
+   * Single-click x402 payment flow:
+   *  1. POST unpaid → 402 challenge (payTo / asset / amount / extra)
+   *  2. Sign EIP-3009 TransferWithAuthorization (wallet sign popup, no gas)
+   *  3. Re-send with X-Payment: base64(signed payload) → backend verifies via BOF + serves response
+   *  4. Backend settles on-chain via BOF asynchronously after response
    */
   async function executePaidRequest<T = unknown>(
     url: string,
@@ -461,6 +551,7 @@ export function useX402Payment() {
     try {
       console.info("[agentpay] request →", url);
 
+      // Step 1: probe — get 402 challenge
       const probe = await fetch(url, init);
       console.info("[agentpay] probe ←", probe.status, url);
 
@@ -482,13 +573,18 @@ export function useX402Payment() {
         );
       }
 
-      const hash = await payExactUsdtTransfer(ethereum, accept, payOpts);
-      setTxHash(hash);
+      const account = await resolveAccount(ethereum, payOpts.account as string);
+      await ensureChain(ethereum, chainFromCaip(accept.network), payOpts.switchChain);
 
-      const paid = await fetch(
-        url,
-        mergeHeaders(init, { [PAYMENT_TX_HEADER]: hash })
-      );
+      // Step 2: Sign EIP-3009 authorization (signature popup — no gas, no tx confirmation)
+      const authPayload = await signEip3009Authorization(ethereum, accept, account);
+
+      // btoa produces standard base64; backend decodes with Buffer.from(str, "base64") ✓
+      const xPayment = btoa(JSON.stringify(authPayload));
+      setTxHash(authPayload.nonce); // use nonce as the reference token
+
+      // Step 3: Re-send with X-Payment header (single request, no retry dance)
+      const paid = await fetch(url, mergeHeaders(init, { "X-Payment": xPayment }));
       return await parseResponseOrThrow<T>(paid);
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Payment execution failed";
