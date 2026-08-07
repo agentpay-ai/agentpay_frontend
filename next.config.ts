@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || "https://agentpay-backend-eight.vercel.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL;
 
 const nextConfig: NextConfig = {
   async rewrites() {

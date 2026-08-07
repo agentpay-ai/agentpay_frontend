@@ -30,6 +30,7 @@ export function usePaidService(service: ServiceKey) {
     error: paymentError,
     clearError,
     txHash,
+    paymentStep,
   } = useX402Payment();
 
   const [settling, setSettling] = useState(false);
@@ -113,6 +114,7 @@ export function usePaidService(service: ServiceKey) {
     error: paymentError,
     clearError,
     txHash,
+    paymentStep,
     // Kept for page compatibility; no prepaid modal in this mode.
     modalOpen: false,
     closeModal: () => {},

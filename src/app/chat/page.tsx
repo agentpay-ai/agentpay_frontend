@@ -30,6 +30,7 @@ export default function ChatPage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
+    paymentStep,
   } = usePaidService("chat");
   const {
     botBalance,
@@ -123,8 +124,8 @@ export default function ChatPage() {
             <h1 className="font-bold text-white text-base">AI Text Assistant</h1>
           </div>
         </div>
-        <span className="text-xs font-bold bg-slate-900 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.01 USDT / prompt
+        <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
+          1.0 $APAY / prompt
         </span>
       </div>
 
@@ -132,11 +133,11 @@ export default function ChatPage() {
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
           <div className="flex items-center space-x-1.5 text-amber-400 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Anthropic Claude AI Powered</span>
+            <span>x402 Micropayments via BOF Facilitator</span>
           </div>
           <p className="text-slate-400">
-            Pay-per-prompt: each message is a $0.01 USDT on-chain transfer to the vault. Your wallet
-            will ask you to confirm payment for every prompt.
+            Pay-per-prompt: each message uses EIP-3009 $APAY authorization. Sign in your wallet once
+            (zero gas). BOF Facilitator verifies off-chain and settles on-chain.
           </p>
         </div>
 
@@ -156,6 +157,20 @@ export default function ChatPage() {
             </button>
           </div>
         ) : null}
+
+        {paymentStep === "signing" && (
+          <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+            <span>🔑 Sign 1.0 $APAY payment authorization in your wallet (0 gas)...</span>
+          </div>
+        )}
+
+        {paymentStep === "verifying" && (
+          <div className="bg-emerald-950/40 border border-emerald-800/80 text-emerald-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+            <span>🔍 Authorization signed! Verifying payment with BOF Facilitator...</span>
+          </div>
+        )}
 
         {paymentError && (
           <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
@@ -195,7 +210,16 @@ export default function ChatPage() {
               }`}
             >
               {msg.sender === "ai" && !msg.isError ? (
-                <ChatMarkdown text={msg.text} />
+                <>
+                  <ChatMarkdown text={msg.text} />
+                  <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
+                    <span className="flex items-center space-x-1 text-emerald-400 font-medium">
+                      <span>⚡ Paid 1.0 $APAY</span>
+                      <span className="text-slate-500">•</span>
+                      <span>BOF Verified</span>
+                    </span>
+                  </div>
+                </>
               ) : (
                 <p className="whitespace-pre-wrap">{msg.text}</p>
               )}

@@ -21,6 +21,7 @@ export default function ImagePage() {
     runPaid,
     loading: paidLoading,
     error: paymentError,
+    paymentStep,
   } = usePaidService("image");
   const {
     botBalance,
@@ -88,8 +89,8 @@ export default function ImagePage() {
             <h1 className="font-bold text-white text-base">AI Image Generator</h1>
           </div>
         </div>
-        <span className="text-xs font-bold bg-slate-900 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          $0.05 USDT / prompt
+        <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
+          5.0 $APAY / prompt
         </span>
       </div>
 
@@ -97,11 +98,11 @@ export default function ImagePage() {
         <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 space-y-2 text-xs">
           <div className="flex items-center space-x-1.5 text-amber-400 font-semibold">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Prompt Enhancer</span>
+            <span>x402 Micropayments via BOF Facilitator</span>
           </div>
           <p className="text-slate-400">
-            Pay-per-prompt: each generation is a $0.05 USDT on-chain transfer. Confirm in your
-            wallet for every request.
+            Pay-per-prompt: each image request uses EIP-3009 $APAY authorization. Sign in your wallet once
+            (zero gas). BOF Facilitator verifies off-chain and settles on-chain.
           </p>
         </div>
 
@@ -117,6 +118,20 @@ export default function ImagePage() {
             </button>
           </div>
         ) : null}
+
+        {paymentStep === "signing" && (
+          <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+            <span>🔑 Sign 5.0 $APAY payment authorization in your wallet (0 gas)...</span>
+          </div>
+        )}
+
+        {paymentStep === "verifying" && (
+          <div className="bg-emerald-950/40 border border-emerald-800/80 text-emerald-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+            <span>🔍 Authorization signed! Verifying payment with BOF Facilitator...</span>
+          </div>
+        )}
 
         {paymentError && (
           <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">

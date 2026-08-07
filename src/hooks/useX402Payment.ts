@@ -525,10 +525,19 @@ async function parseResponseOrThrow<T>(res: Response): Promise<T> {
   return (json ?? text) as T;
 }
 
+export type PaymentStep =
+  | "idle"
+  | "probing"
+  | "signing"
+  | "verifying"
+  | "completed"
+  | "error";
+
 export function useX402Payment() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [step, setStep] = useState<PaymentStep>("idle");
 
   /**
    * Single-click x402 payment flow:
@@ -545,6 +554,7 @@ export function useX402Payment() {
     setLoading(true);
     setError(null);
     setTxHash(null);
+    setStep("probing");
 
     const init = jsonInit(options);
 
@@ -556,6 +566,7 @@ export function useX402Payment() {
       console.info("[agentpay] probe ←", probe.status, url);
 
       if (probe.status !== 402) {
+        setStep("completed");
         return await parseResponseOrThrow<T>(probe);
       }
 
@@ -577,6 +588,7 @@ export function useX402Payment() {
       await ensureChain(ethereum, chainFromCaip(accept.network), payOpts.switchChain);
 
       // Step 2: Sign EIP-3009 authorization (signature popup — no gas, no tx confirmation)
+      setStep("signing");
       const authPayload = await signEip3009Authorization(ethereum, accept, account);
 
       // btoa produces standard base64; backend decodes with Buffer.from(str, "base64") ✓
@@ -584,12 +596,16 @@ export function useX402Payment() {
       setTxHash(authPayload.nonce); // use nonce as the reference token
 
       // Step 3: Re-send with X-Payment header (single request, no retry dance)
+      setStep("verifying");
       const paid = await fetch(url, mergeHeaders(init, { "X-Payment": xPayment }));
-      return await parseResponseOrThrow<T>(paid);
+      const result = await parseResponseOrThrow<T>(paid);
+      setStep("completed");
+      return result;
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : "Payment execution failed";
       console.error("[agentpay] request failed:", errMsg);
       setError(errMsg);
+      setStep("error");
       throw err;
     } finally {
       setLoading(false);
@@ -601,6 +617,10 @@ export function useX402Payment() {
     loading,
     error,
     txHash,
-    clearError: () => setError(null),
+    paymentStep: step,
+    clearError: () => {
+      setError(null);
+      setStep("idle");
+    },
   };
 }
