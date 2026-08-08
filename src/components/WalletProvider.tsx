@@ -7,7 +7,7 @@ import { botChainTestnet, botChain, celo, celoSepolia } from "@/lib/chains";
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "clp1234567890123456789012";
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || "";
 
   return (
     <PrivyProvider
