@@ -149,7 +149,7 @@ export default function ChatPage() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            ✨ Gemini 2.5 Flash
+            ✨ Gemini 3.6 Flash
           </button>
           <button
             onClick={() => setProvider("claude")}
@@ -174,7 +174,7 @@ export default function ChatPage() {
             Pay-per-prompt: each message uses EIP-3009 $APAY authorization. Sign in your wallet once
             (zero gas). BOF Facilitator verifies off-chain and settles on-chain. Active model:{" "}
             <strong className="text-amber-400">
-              {provider === "gemini" ? "Google Gemini 2.5 Flash (Default)" : "Anthropic Claude 3.5"}
+              {provider === "gemini" ? "Google Gemini 3.6 Flash (Default)" : "Anthropic Claude 3.5"}
             </strong>
           </p>
         </div>
@@ -247,7 +247,7 @@ export default function ChatPage() {
                       <span>⚡ Paid 1.0 $APAY</span>
                       <span className="text-slate-500">•</span>
                       <span>
-                        {msg.provider === "claude" ? "Claude Verified" : "Gemini 2.5 Verified"}
+                        {msg.provider === "claude" ? "Claude Verified" : "Gemini 3.6 Verified"}
                       </span>
                     </span>
                   </div>
@@ -264,7 +264,7 @@ export default function ChatPage() {
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
             <span>
               Generating answer with{" "}
-              {provider === "gemini" ? "Google Gemini 2.5 Flash..." : "Anthropic Claude 3.5..."}
+              {provider === "gemini" ? "Google Gemini 3.6 Flash..." : "Anthropic Claude 3.5..."}
             </span>
           </div>
         )}
@@ -282,7 +282,7 @@ export default function ChatPage() {
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder={`Ask ${provider === "gemini" ? "Gemini 2.5 Flash" : "Claude 3.5"} anything...`}
+            placeholder={`Ask ${provider === "gemini" ? "Gemini 3.6 Flash" : "Claude 3.5"} anything...`}
             disabled={busy}
             className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 disabled:opacity-50"
           />
