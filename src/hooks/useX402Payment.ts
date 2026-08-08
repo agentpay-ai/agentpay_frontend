@@ -10,7 +10,7 @@ import {
   type Hash,
 } from "viem";
 import { botChainTestnet, botChain } from "@/lib/chains";
-import { PAYMENT_ASSET } from "@/lib/pricing";
+import { PAYMENT_ASSET, formatApayAmount } from "@/lib/pricing";
 import { TOKENS } from "@/lib/tokens";
 
 export interface EthereumProvider {
@@ -408,8 +408,9 @@ async function signEip3009Authorization(
     },
   };
 
+  const formattedAmount = formatApayAmount(accept.amount);
   console.info(
-    `[agentpay] signing EIP-3009 auth → from=${account} to=${accept.payTo} amount=${accept.amount}`
+    `[agentpay] signing EIP-3009 auth → from=${account} to=${accept.payTo} amount=${formattedAmount} (${accept.amount} wei)`
   );
 
   const signature = (await withTimeout(
@@ -538,6 +539,7 @@ export function useX402Payment() {
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [step, setStep] = useState<PaymentStep>("idle");
+  const [formattedAmount, setFormattedAmount] = useState<string | null>(null);
 
   /**
    * Single-click x402 payment flow:
@@ -588,6 +590,7 @@ export function useX402Payment() {
       await ensureChain(ethereum, chainFromCaip(accept.network), payOpts.switchChain);
 
       // Step 2: Sign EIP-3009 authorization (signature popup — no gas, no tx confirmation)
+      setFormattedAmount(formatApayAmount(accept.amount));
       setStep("signing");
       const authPayload = await signEip3009Authorization(ethereum, accept, account);
 
@@ -618,9 +621,11 @@ export function useX402Payment() {
     error,
     txHash,
     paymentStep: step,
+    formattedAmount,
     clearError: () => {
       setError(null);
       setStep("idle");
+      setFormattedAmount(null);
     },
   };
 }

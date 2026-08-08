@@ -56,6 +56,15 @@ export function formatAtomicApay(amountAtomic: bigint): string {
   return formatApay(atomicToTokens(amountAtomic));
 }
 
+export function formatApayAmount(atomicWei: string | bigint): string {
+  try {
+    const val = typeof atomicWei === "bigint" ? atomicWei : BigInt(atomicWei);
+    return formatAtomicApay(val);
+  } catch {
+    return `${atomicWei} $APAY`;
+  }
+}
+
 // Backward compatibility helpers
 export const BUDGET_PRESETS_USD = BUDGET_PRESETS_TOKENS;
 export const formatUsdt = formatAtomicApay;

@@ -29,6 +29,7 @@ export default function CodePage() {
     loading: paidLoading,
     error: paymentError,
     paymentStep,
+    formattedAmount,
   } = usePaidService("code");
   const {
     botBalance,
@@ -129,7 +130,7 @@ export default function CodePage() {
         {paymentStep === "signing" && (
           <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span>🔑 Sign 2.0 $APAY payment authorization in your wallet (0 gas)...</span>
+            <span>🔑 Sign {formattedAmount || "2.0 $APAY"} payment authorization in your wallet (0 gas)...</span>
           </div>
         )}
 
