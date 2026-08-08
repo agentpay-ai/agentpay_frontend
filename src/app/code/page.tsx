@@ -9,6 +9,9 @@ import { BalanceBar } from "@/components/BalanceBar";
 import { Code, Sparkles, Loader2, ArrowLeft, ShieldCheck, Wallet } from "lucide-react";
 import Link from "next/link";
 
+import { useApayPrice } from "@/hooks/useApayPrice";
+import { formatApay } from "@/lib/pricing";
+
 interface AuditReport {
   score: string;
   vulnerabilities: number;
@@ -19,6 +22,7 @@ interface AuditReport {
 export default function CodePage() {
   const allowNetworkSwitch = useCanSwitchNetwork();
   const { disconnectWallet, switchOrAddBotChain } = useWallet();
+  const { servicePrices } = useApayPrice();
   const {
     address,
     authenticated,
@@ -98,7 +102,7 @@ export default function CodePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          2.0 $APAY / audit
+          {formatApay(servicePrices.code.amountTokens)} / audit
         </span>
       </div>
 
@@ -116,7 +120,7 @@ export default function CodePage() {
 
         {!authenticated || !address ? (
           <div className="bg-purple-950/40 border border-purple-800/60 rounded-xl p-4 space-y-3 text-xs">
-            <p className="text-purple-100 font-medium">Connect a wallet to pay with USDT</p>
+            <p className="text-purple-100 font-medium">Connect a wallet to pay with $APAY</p>
             <button
               onClick={() => connectWallet()}
               className="w-full flex items-center justify-center space-x-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold py-2.5 rounded-xl transition"
@@ -130,7 +134,7 @@ export default function CodePage() {
         {paymentStep === "signing" && (
           <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span>🔑 Sign {formattedAmount || "2.0 $APAY"} payment authorization in your wallet (0 gas)...</span>
+            <span>🔑 Sign {formattedAmount || "$APAY"} payment authorization in your wallet (0 gas)...</span>
           </div>
         )}
 

@@ -41,7 +41,13 @@ export type ServiceKey = keyof typeof SERVICE_PRICES;
 export const BUDGET_PRESETS_TOKENS = [10, 50, 100, 500] as const;
 
 export function formatApay(tokens: number): string {
-  return `${tokens.toFixed(1)} $APAY`;
+  const formatted =
+    tokens % 1 === 0
+      ? tokens.toFixed(1)
+      : Number.isInteger(tokens * 100)
+      ? tokens.toFixed(2)
+      : tokens.toFixed(4);
+  return `${formatted} $APAY`;
 }
 
 export function tokensToAtomic(tokens: number): bigint {

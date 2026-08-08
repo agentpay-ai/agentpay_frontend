@@ -590,7 +590,8 @@ export function useX402Payment() {
       await ensureChain(ethereum, chainFromCaip(accept.network), payOpts.switchChain);
 
       // Step 2: Sign EIP-3009 authorization (signature popup — no gas, no tx confirmation)
-      setFormattedAmount(formatApayAmount(accept.amount));
+      const paidFormatted = formatApayAmount(accept.amount);
+      setFormattedAmount(paidFormatted);
       setStep("signing");
       const authPayload = await signEip3009Authorization(ethereum, accept, account);
 
@@ -602,6 +603,9 @@ export function useX402Payment() {
       setStep("verifying");
       const paid = await fetch(url, mergeHeaders(init, { "X-Payment": xPayment }));
       const result = await parseResponseOrThrow<T>(paid);
+      if (result && typeof result === "object") {
+        (result as any)._paidAmountFormatted = paidFormatted;
+      }
       setStep("completed");
       return result;
     } catch (err: unknown) {

@@ -9,9 +9,13 @@ import { BalanceBar } from "@/components/BalanceBar";
 import { Image as ImageIcon, Sparkles, Loader2, ArrowLeft, Download, Wallet } from "lucide-react";
 import Link from "next/link";
 
+import { useApayPrice } from "@/hooks/useApayPrice";
+import { formatApay } from "@/lib/pricing";
+
 export default function ImagePage() {
   const allowNetworkSwitch = useCanSwitchNetwork();
   const { disconnectWallet, switchOrAddBotChain } = useWallet();
+  const { servicePrices } = useApayPrice();
   const {
     address,
     authenticated,
@@ -91,7 +95,7 @@ export default function ImagePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          5.0 $APAY / prompt
+          {formatApay(servicePrices.image.amountTokens)} / prompt
         </span>
       </div>
 
@@ -109,7 +113,7 @@ export default function ImagePage() {
 
         {!authenticated || !address ? (
           <div className="bg-purple-950/40 border border-purple-800/60 rounded-xl p-4 space-y-3 text-xs">
-            <p className="text-purple-100 font-medium">Connect a wallet to pay with USDT</p>
+            <p className="text-purple-100 font-medium">Connect a wallet to pay with $APAY</p>
             <button
               onClick={() => connectWallet()}
               className="w-full flex items-center justify-center space-x-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold py-2.5 rounded-xl transition"
@@ -123,7 +127,7 @@ export default function ImagePage() {
         {paymentStep === "signing" && (
           <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span>🔑 Sign {formattedAmount || "5.0 $APAY"} payment authorization in your wallet (0 gas)...</span>
+            <span>🔑 Sign {formattedAmount || "$APAY"} payment authorization in your wallet (0 gas)...</span>
           </div>
         )}
 

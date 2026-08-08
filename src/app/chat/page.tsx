@@ -10,6 +10,9 @@ import { ChatMarkdown } from "@/components/ChatMarkdown";
 import { Bot, Send, Sparkles, Loader2, ArrowLeft, User, Wallet, Cpu } from "lucide-react";
 import Link from "next/link";
 
+import { useApayPrice } from "@/hooks/useApayPrice";
+import { formatApay } from "@/lib/pricing";
+
 interface MessageItem {
   id: string;
   sender: "user" | "ai";
@@ -17,11 +20,13 @@ interface MessageItem {
   timestamp: string;
   provider?: "gemini" | "claude";
   isError?: boolean;
+  paidAmountFormatted?: string | null;
 }
 
 export default function ChatPage() {
   const allowNetworkSwitch = useCanSwitchNetwork();
   const { disconnectWallet, switchOrAddBotChain } = useWallet();
+  const { servicePrices } = useApayPrice();
   const {
     address,
     authenticated,
@@ -63,11 +68,13 @@ export default function ChatPage() {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      const data = await runPaid<{ response?: string }>({ prompt: userPrompt, provider: activeProvider });
-      const aiText = data.response;
+      const data = await runPaid<any>({ prompt: userPrompt, provider: activeProvider });
+      const aiText = typeof data === "string" ? data : data?.response;
       if (!aiText) {
         throw new Error("No response received from AI");
       }
+
+      const paidFormatted = data?._paidAmountFormatted || formattedAmount;
 
       setMessages((prev) => [
         ...prev,
@@ -76,6 +83,7 @@ export default function ChatPage() {
           sender: "ai",
           text: aiText,
           provider: activeProvider,
+          paidAmountFormatted: paidFormatted,
           timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -88,8 +96,8 @@ export default function ChatPage() {
           id: `error-${Date.now()}`,
           sender: "ai",
           text: err instanceof Error ? err.message : "Chat request failed",
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           isError: true,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
     } finally {
@@ -130,7 +138,7 @@ export default function ChatPage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          1.0 $APAY / prompt
+          {formatApay(servicePrices.chat.amountTokens)} / prompt
         </span>
       </div>
 
@@ -195,7 +203,7 @@ export default function ChatPage() {
         {paymentStep === "signing" && (
           <div className="bg-amber-950/40 border border-amber-800/80 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-            <span>🔑 Sign {formattedAmount || "1.0 $APAY"} payment authorization in your wallet (0 gas)...</span>
+            <span>🔑 Sign {formattedAmount || "$APAY"} payment authorization in your wallet (0 gas)...</span>
           </div>
         )}
 
@@ -244,7 +252,7 @@ export default function ChatPage() {
                   <ChatMarkdown text={msg.text} />
                   <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400">
                     <span className="flex items-center space-x-1 text-emerald-400 font-medium">
-                      <span>⚡ Paid 1.0 $APAY</span>
+                      <span>⚡ Paid {msg.paidAmountFormatted || "$APAY"}</span>
                       <span className="text-slate-500">•</span>
                       <span>
                         {msg.provider === "claude" ? "Claude Verified" : "Gemini 3.6 Verified"}
