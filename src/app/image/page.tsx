@@ -7,6 +7,7 @@ import { usePaidService } from "@/hooks/usePaidService";
 import { useBackendWarmup } from "@/hooks/useBackendWarmup";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
+import { ChatMarkdown } from "@/components/ChatMarkdown";
 import {
   Image as ImageIcon,
   Sparkles,
@@ -300,7 +301,9 @@ export default function ImagePage() {
                 className="w-full max-h-40 object-contain rounded-lg border border-slate-800 opacity-70"
               />
             )}
-            <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">{result.analysis}</p>
+            <div className="text-slate-200 leading-relaxed text-xs">
+              <ChatMarkdown text={result.analysis} />
+            </div>
           </div>
         )}
       </div>
