@@ -514,13 +514,19 @@ async function parseResponseOrThrow<T>(res: Response): Promise<T> {
   }
 
   if (!res.ok) {
-    const message =
+    const rawMessage =
       (typeof json?.error === "string" && json.error) ||
       (typeof json?.details === "string" && json.details) ||
       (typeof json?.message === "string" && json.message) ||
       text.slice(0, 200) ||
       res.statusText;
-    throw new Error(message);
+    const hint = typeof json?.hint === "string" && json.hint ? ` (${json.hint})` : "";
+    const isQuota =
+      res.status === 429 ||
+      json?.errorType === "rate_limit" ||
+      /quota|RESOURCE_EXHAUSTED|rate_limit|limit: 20|429/i.test(rawMessage);
+    const prefix = isQuota ? "AI Quota Exceeded (429 Rate Limit): " : "";
+    throw new Error(`${prefix}${rawMessage}${hint}`);
   }
 
   return (json ?? text) as T;
