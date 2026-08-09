@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
 import { usePaidService } from "@/hooks/usePaidService";
+import { useBackendWarmup } from "@/hooks/useBackendWarmup";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
@@ -24,6 +25,8 @@ interface MessageItem {
 }
 
 export default function ChatPage() {
+  // Wake the Render free-tier backend on page load (prevents cold-start payment timeouts)
+  useBackendWarmup();
   const allowNetworkSwitch = useCanSwitchNetwork();
   const { disconnectWallet, switchOrAddBotChain } = useWallet();
   const { servicePrices } = useApayPrice();
