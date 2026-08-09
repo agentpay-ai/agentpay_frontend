@@ -313,8 +313,22 @@ export default function CodePage() {
           </div>
         )}
         {error && (
-          <div className="bg-rose-950/40 border border-rose-800 text-rose-300 rounded-xl p-3 text-xs">
-            {error}
+          <div
+            className={`rounded-xl p-3.5 text-xs space-y-1.5 ${
+              /quota|429|rate_limit|RESOURCE_EXHAUSTED|limit: 20/i.test(error)
+                ? "bg-amber-950/60 border border-amber-500/60 text-amber-200"
+                : "bg-rose-950/40 border border-rose-800 text-rose-300"
+            }`}
+          >
+            <div className="font-semibold flex items-center space-x-1.5">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+              <span>
+                {/quota|429|rate_limit|RESOURCE_EXHAUSTED|limit: 20/i.test(error)
+                  ? "AI Quota Exceeded (HTTP 429)"
+                  : "Audit Error"}
+              </span>
+            </div>
+            <p className="leading-relaxed opacity-90">{error}</p>
           </div>
         )}
 
