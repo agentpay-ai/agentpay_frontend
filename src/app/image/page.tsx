@@ -166,7 +166,9 @@ export default function ImagePage() {
           </div>
         </div>
         <span className="text-xs font-bold bg-slate-900 text-amber-400 px-2.5 py-1 rounded-lg border border-slate-800">
-          {formatApay(servicePrices.image.amountTokens)} / prompt
+          {uploadedImage
+            ? `${formatApay(servicePrices.chat.amountTokens)} / analysis (Vision)`
+            : `${formatApay(servicePrices.image.amountTokens)} / image (Imagen 3)`}
         </span>
       </div>
 
@@ -209,7 +211,7 @@ export default function ImagePage() {
             <span>Text-to-Image & Vision Analysis</span>
           </div>
           <p className="text-slate-400">
-            Generate images from prompts with Imagen 3, or upload an image for AI vision analysis. Powered by x402 micropayments.
+            Generate images with Imagen 3 (~5 $APAY) or upload an image for AI vision analysis (~1 $APAY). Powered by x402 micropayments.
           </p>
         </div>
 
@@ -367,6 +369,7 @@ export default function ImagePage() {
           <button
             onClick={handleGenerate}
             disabled={!canGenerate}
+            title={uploadedImage ? "Analyze Image (Vision mode ~1 $APAY)" : "Generate Image (Imagen 3 ~5 $APAY)"}
             className="absolute bottom-2.5 right-2.5 p-2 bg-amber-400 hover:bg-amber-300 disabled:bg-slate-800 text-slate-950 rounded-lg transition"
           >
             {busy ? (

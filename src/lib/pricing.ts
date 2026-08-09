@@ -21,6 +21,12 @@ export const SERVICE_PRICES = {
     label: "AI Image Generator",
     path: "/api/image",
   },
+  vision: {
+    amountAtomic: BigInt("1000000000000000000"), // 1.0 APAY
+    amountTokens: 1.0,
+    label: "AI Vision Analysis",
+    path: "/api/image",
+  },
   code: {
     amountAtomic: BigInt("2000000000000000000"), // 2.0 APAY
     amountTokens: 2.0,
