@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { getExpectedChainId, isExpectedTestnet } from "@/lib/environment";
 
 export interface EthereumProvider {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -79,7 +80,7 @@ export function useWallet() {
   }, [login, address]);
 
   const switchOrAddBotChain = useCallback(
-    async (isTestnet = true) => {
+    async (isTestnet = isExpectedTestnet()) => {
       const chainIdHex = isTestnet ? "0x3c8" : "0x2a5"; // 968 decimal / 677 decimal
       const chainIdDec = isTestnet ? 968 : 677;
 
@@ -166,8 +167,10 @@ export function useWallet() {
     [primaryWallet]
   );
 
-  const chainIdRaw = primaryWallet?.chainId ? String(primaryWallet.chainId).replace("eip155:", "") : "968";
-  const currentChainId = parseInt(chainIdRaw, 10) || 968;
+  const defaultChainId = getExpectedChainId();
+  const defaultChainIdStr = String(defaultChainId);
+  const chainIdRaw = primaryWallet?.chainId ? String(primaryWallet.chainId).replace("eip155:", "") : defaultChainIdStr;
+  const currentChainId = parseInt(chainIdRaw, 10) || defaultChainId;
   const isTestnet = currentChainId === 968;
   const currentChainName = currentChainId === 677 ? "BotChain Mainnet" : currentChainId === 968 ? "BotChain Testnet" : `Chain ${currentChainId}`;
 

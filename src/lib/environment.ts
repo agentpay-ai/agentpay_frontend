@@ -12,6 +12,19 @@ export function getEnvironment(): AppEnvironment {
 }
 
 /**
+ * Expected chain ID based on the frontend environment mode:
+ * Production  -> 677 (BotChain Mainnet)
+ * Development -> 968 (BotChain Testnet)
+ */
+export function getExpectedChainId(): number {
+  return getEnvironment() === "production" ? 677 : 968;
+}
+
+export function isExpectedTestnet(): boolean {
+  return getEnvironment() !== "production";
+}
+
+/**
  * Base URL for the Hono API used by browser `fetch`.
  *
  * In the browser we always use same-origin relative URLs (`""` → `/api/...`).

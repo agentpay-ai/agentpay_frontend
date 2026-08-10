@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createPublicClient, formatUnits, http } from "viem";
 import { botChainTestnet, botChain } from "@/lib/chains";
 import { TOKENS, ERC20_ABI } from "@/lib/tokens";
+import { getEnvironment } from "@/lib/environment";
 
 export interface BalanceState {
   botBalance: string;
@@ -28,7 +29,7 @@ export function useBalance(address: string | null | undefined, _chainId?: number
     setIsLoading(true);
 
     try {
-      const isMainnet = window.location.hostname === "agentpay.ai";
+      const isMainnet = getEnvironment() === "production";
       const chain = isMainnet ? botChain : botChainTestnet;
       const tokenConfig = isMainnet ? TOKENS.botChainMainnet : TOKENS.botChainTestnet;
 

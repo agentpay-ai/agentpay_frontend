@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown, Copy, Check } from "lucide-react";
+import { isExpectedTestnet } from "@/lib/environment";
 
 interface BalanceBarProps {
   address: string | null;
@@ -30,7 +31,7 @@ export function BalanceBar({
   loading,
   onRefresh,
   onDisconnect,
-  isTestnet = true,
+  isTestnet = isExpectedTestnet(),
   onSwitchNetwork,
   allowNetworkSwitch = false,
 }: BalanceBarProps) {
