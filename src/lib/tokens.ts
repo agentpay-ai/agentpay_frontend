@@ -1,14 +1,14 @@
 export const TOKENS = {
-  // BotChain Mainnet (Chain ID: 677)
+  // BotChain Mainnet (Chain ID: 677) - Set via env vars when deployed
   botChainMainnet: {
-    APAY: "0x6A96C2755E8D88b1b369C9F3C6415B17B03eA44E" as `0x${string}`,
-    USDT: "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C" as `0x${string}`,
-    BOUSDT: "0x118f7B25a0907577041F1c10d7E0cBD153986f66" as `0x${string}`,
+    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
+    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
+    BOUSDT: (process.env.NEXT_PUBLIC_BOUSDT_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
   },
   // BotChain Testnet / Devnet (Chain ID: 968)
   botChainTestnet: {
-    APAY: "0xFd7bF688d5a772A81DfE39da502F69FD99cE92c7" as `0x${string}`,
-    USDT: "0x75edC9335175Fc0552D51D48439F229c10420fe3" as `0x${string}`,
+    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_TESTNET || "0xFd7bF688d5a772A81DfE39da502F69FD99cE92c7") as `0x${string}`,
+    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_TESTNET || "0x75edC9335175Fc0552D51D48439F229c10420fe3") as `0x${string}`,
   },
 };
 

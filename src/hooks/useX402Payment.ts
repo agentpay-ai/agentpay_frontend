@@ -7,6 +7,7 @@ import {
   custom,
   encodeFunctionData,
   http,
+  isAddress,
   type Hash,
 } from "viem";
 import { botChainTestnet, botChain } from "@/lib/chains";
@@ -361,6 +362,18 @@ async function signEip3009Authorization(
   account: `0x${string}`
 ): Promise<Eip3009Payload> {
   const target = chainFromCaip(accept.network);
+
+  if (!accept.asset || !isAddress(accept.asset)) {
+    throw new Error(
+      `$APAY token contract is not yet deployed or configured on ${target.chain.name} (Chain ID ${target.chainId}). Please switch to BotChain Testnet (968).`
+    );
+  }
+
+  if (!accept.payTo || !isAddress(accept.payTo)) {
+    throw new Error(
+      `AgentPay vault recipient contract is not yet deployed or configured on ${target.chain.name} (Chain ID ${target.chainId}). Please switch to BotChain Testnet (968).`
+    );
+  }
 
   // Random 32-byte nonce
   const nonceBytes = crypto.getRandomValues(new Uint8Array(32));

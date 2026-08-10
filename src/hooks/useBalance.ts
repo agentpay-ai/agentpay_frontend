@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createPublicClient, formatUnits, http } from "viem";
+import { createPublicClient, formatUnits, http, isAddress } from "viem";
 import { botChainTestnet, botChain } from "@/lib/chains";
 import { TOKENS, ERC20_ABI } from "@/lib/tokens";
 import { getEnvironment } from "@/lib/environment";
@@ -38,27 +38,42 @@ export function useBalance(address: string | null | undefined, _chainId?: number
         transport: http(),
       });
 
+      async function safeReadContract(
+        tokenAddr: string,
+        abi: typeof ERC20_ABI,
+        functionName: "balanceOf",
+        args: [`0x${string}`]
+      ): Promise<bigint> {
+        if (!tokenAddr || !isAddress(tokenAddr)) {
+          return BigInt(0);
+        }
+        try {
+          return await client.readContract({
+            address: tokenAddr as `0x${string}`,
+            abi,
+            functionName,
+            args,
+          });
+        } catch (err) {
+          console.warn(`[useBalance] Skipping un-deployed or failing token at ${tokenAddr}:`, err);
+          return BigInt(0);
+        }
+      }
+
+      async function safeGetBalance(userAddr: `0x${string}`): Promise<bigint> {
+        try {
+          return await client.getBalance({ address: userAddr });
+        } catch {
+          return BigInt(0);
+        }
+      }
+
       const [botRaw, apayRaw, usdtRaw, bousdtRaw] = await Promise.all([
-        client.getBalance({ address: address as `0x${string}` }),
-        client.readContract({
-          address: tokenConfig.APAY,
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [address as `0x${string}`],
-        }),
-        client.readContract({
-          address: tokenConfig.USDT,
-          abi: ERC20_ABI,
-          functionName: "balanceOf",
-          args: [address as `0x${string}`],
-        }),
+        safeGetBalance(address as `0x${string}`),
+        safeReadContract(tokenConfig.APAY, ERC20_ABI, "balanceOf", [address as `0x${string}`]),
+        safeReadContract(tokenConfig.USDT, ERC20_ABI, "balanceOf", [address as `0x${string}`]),
         isMainnet && TOKENS.botChainMainnet.BOUSDT
-          ? client.readContract({
-              address: TOKENS.botChainMainnet.BOUSDT,
-              abi: ERC20_ABI,
-              functionName: "balanceOf",
-              args: [address as `0x${string}`],
-            })
+          ? safeReadContract(TOKENS.botChainMainnet.BOUSDT, ERC20_ABI, "balanceOf", [address as `0x${string}`])
           : Promise.resolve(BigInt(0)),
       ]);
 
