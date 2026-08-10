@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Wallet, Coins, RefreshCw, Cpu, LogOut, ChevronDown, Copy, Check } from "lucide-react";
-import { isExpectedTestnet } from "@/lib/environment";
+import { getEnvironment, isExpectedTestnet } from "@/lib/environment";
 
 interface BalanceBarProps {
   address: string | null;
@@ -40,6 +40,10 @@ export function BalanceBar({
   const truncatedAddress = address
     ? `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
     : null;
+
+  // When NEXT_PUBLIC_ENVIRONMENT === "production", display BotChain Mainnet (677)
+  const isProd = getEnvironment() === "production";
+  const displayIsTestnet = isProd ? false : isTestnet;
 
   async function handleCopyAddress() {
     if (!address) return;
@@ -94,11 +98,11 @@ export function BalanceBar({
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+                  displayIsTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
                 }`}
               />
               <Cpu className="w-3 h-3 text-purple-300" />
-              <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
+              <span>{displayIsTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
               <ChevronDown className="w-3 h-3 text-purple-400" />
             </button>
           ) : (
@@ -108,11 +112,11 @@ export function BalanceBar({
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
+                  displayIsTestnet ? "bg-amber-400 animate-pulse" : "bg-emerald-400"
                 }`}
               />
               <Cpu className="w-3 h-3 text-purple-300" />
-              <span>{isTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
+              <span>{displayIsTestnet ? "BotChain Testnet (968)" : "BotChain Mainnet (677)"}</span>
             </div>
           )}
 
