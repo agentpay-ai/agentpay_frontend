@@ -1,8 +1,8 @@
 # AgentPay AI — Frontend
 
-> Next.js web app for the [AgentPay AI](https://agentpayfrontend.vercel.app) platform — pay-per-use AI powered by on-chain USDT payments on BotChain.
+> Next.js web app for the [AgentPay AI](https://agentpayai.online/) platform — pay-per-use AI powered by on-chain USDT payments on BotChain.
 
-**Live Site:** https://agentpayfrontend.vercel.app  
+**Live Site:** agentpayai.online  
 **Backend API:** https://agentpay-backend-eight.vercel.app  
 **GitHub Org:** https://github.com/agentpay-ai
 
