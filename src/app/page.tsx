@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@/hooks/useWallet";
 import { useBalance } from "@/hooks/useBalance";
+import { useApayPrice } from "@/hooks/useApayPrice";
 import { BalanceBar } from "@/components/BalanceBar";
 import { AgentIdentityBadge } from "@/components/AgentIdentityBadge";
 import { FeedbackModal } from "@/components/FeedbackModal";
@@ -28,11 +29,16 @@ export default function Home() {
     loading: balanceLoading,
     refetch,
   } = useBalance(address, currentChainId);
+  const { servicePrices } = useApayPrice();
   const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   function handleFeedbackSubmit(score: number, notes: string) {
     console.log("Feedback submitted:", { score, notes });
   }
+
+  const chatApay = servicePrices.chat.amountTokens;
+  const codeApay = servicePrices.code.amountTokens;
+  const imageApay = servicePrices.image.amountTokens;
 
   return (
     <main className="flex flex-col min-h-screen max-w-md mx-auto bg-slate-950 text-slate-100 shadow-2xl border-x border-slate-800">
@@ -52,15 +58,15 @@ export default function Home() {
 
       <div className="flex-1 p-5 space-y-5">
         {/* Banner */}
-        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden">
-          <div className="flex items-center justify-between">
+        <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-purple-950/40 p-5 rounded-2xl border border-slate-800 space-y-3 relative overflow-hidden shadow-lg">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
             <span className="inline-flex items-center space-x-1.5 bg-amber-400/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-400/20">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Google Gemini Flash Powered</span>
+              <span>Gemini 3.6 & Claude Opus 5</span>
             </span>
             <span className="inline-flex items-center space-x-1 bg-purple-400/10 text-purple-400 text-xs font-medium px-2 py-0.5 rounded-full border border-purple-400/20">
               <Cpu className="w-3 h-3" />
-              <span>BotChain Active</span>
+              <span>{isTestnet ? "Testnet 968" : "Mainnet 677"}</span>
             </span>
             {inMiniPay && (
               <span className="inline-flex items-center space-x-1 bg-emerald-400/10 text-emerald-400 text-xs font-medium px-2 py-0.5 rounded-full border border-emerald-400/20">
@@ -74,23 +80,23 @@ export default function Home() {
             BotChain Autonomous AI
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
-            Pay-per-prompt AI access hub on BotChain EVM for text completions, image generation, and code security audits. Sub-cent USDT micro-transactions only — no subscriptions, no native BOT charged as payment.
+            Pay-per-prompt AI access hub on BotChain EVM for text completions, high-resolution image generation, and smart contract code audits. Sub-cent $APAY micro-transactions via EIP-3009 signatures — zero gas, no subscriptions.
           </p>
 
           {!address ? (
             <button
               onClick={connectWallet}
               disabled={connecting}
-              className="w-full mt-2 bg-purple-500 hover:bg-purple-400 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 text-sm shadow-lg shadow-purple-500/20"
+              className="w-full mt-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center space-x-2 text-sm shadow-lg shadow-purple-600/20"
             >
               <Smartphone className="w-4 h-4" />
-              <span>{connecting ? "Connecting..." : "Connect Wallet"}</span>
+              <span>{connecting ? "Connecting Wallet..." : "Connect Wallet to Start"}</span>
             </button>
           ) : (
             <div className="flex items-center justify-between pt-1">
               <span className="text-xs text-emerald-400 font-medium flex items-center space-x-1">
                 <CheckCircle className="w-3.5 h-3.5" />
-                <span>Wallet Connected</span>
+                <span>Wallet Connected ({address.slice(0, 6)}...{address.slice(-4)})</span>
               </span>
               <button
                 onClick={disconnectWallet}
@@ -109,11 +115,11 @@ export default function Home() {
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Available AI Tools
+              Available AI Services
             </h2>
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-medium"
+              className="text-xs text-amber-400 hover:text-amber-300 flex items-center space-x-1 font-medium transition"
             >
               <Star className="w-3 h-3 fill-amber-400" />
               <span>Give Feedback</span>
@@ -124,7 +130,7 @@ export default function Home() {
             {/* Chat Tool */}
             <Link
               href="/chat"
-              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/30 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group shadow-sm"
             >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 group-hover:scale-105 transition">
@@ -132,18 +138,23 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white text-sm">AI Text Assistant</h3>
-                  <p className="text-xs text-slate-400">GPT / Gemini 2.5 Flash LLM</p>
+                  <p className="text-xs text-slate-400">Gemini 3.6 Flash & Claude Opus 5</p>
                 </div>
               </div>
-              <span className="text-xs font-bold bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.01 USDT
-              </span>
+              <div className="text-right">
+                <span className="text-xs font-bold bg-slate-800 text-emerald-400 px-2.5 py-1 rounded-lg border border-slate-700 block">
+                  ${servicePrices.chat.targetUsdCost.toFixed(4)}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">
+                  ~{chatApay.toFixed(2)} APAY
+                </span>
+              </div>
             </Link>
 
             {/* Image Gen Tool */}
             <Link
               href="/image"
-              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-purple-500/30 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group shadow-sm"
             >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 group-hover:scale-105 transition">
@@ -154,15 +165,20 @@ export default function Home() {
                   <p className="text-xs text-slate-400">High-res 512×512 generation</p>
                 </div>
               </div>
-              <span className="text-xs font-bold bg-slate-800 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.05 USDT
-              </span>
+              <div className="text-right">
+                <span className="text-xs font-bold bg-slate-800 text-purple-400 px-2.5 py-1 rounded-lg border border-slate-700 block">
+                  ${servicePrices.image.targetUsdCost.toFixed(4)}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">
+                  ~{imageApay.toFixed(2)} APAY
+                </span>
+              </div>
             </Link>
 
             {/* Code Review Tool */}
             <Link
               href="/code"
-              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group"
+              className="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-sky-500/30 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group shadow-sm"
             >
               <div className="flex items-center space-x-3.5">
                 <div className="p-3 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20 group-hover:scale-105 transition">
@@ -170,12 +186,17 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-white text-sm">AI Code Reviewer</h3>
-                  <p className="text-xs text-slate-400">Bug & security audit</p>
+                  <p className="text-xs text-slate-400">Security audit & bug detection</p>
                 </div>
               </div>
-              <span className="text-xs font-bold bg-slate-800 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-700">
-                $0.02 USDT
-              </span>
+              <div className="text-right">
+                <span className="text-xs font-bold bg-slate-800 text-sky-400 px-2.5 py-1 rounded-lg border border-slate-700 block">
+                  ${servicePrices.code.targetUsdCost.toFixed(4)}
+                </span>
+                <span className="text-[10px] text-slate-500 mt-0.5 block">
+                  ~{codeApay.toFixed(2)} APAY
+                </span>
+              </div>
             </Link>
           </div>
         </div>
