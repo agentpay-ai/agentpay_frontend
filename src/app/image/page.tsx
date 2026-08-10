@@ -107,6 +107,10 @@ export default function ImagePage() {
 
   async function handleGenerate() {
     if ((!prompt.trim() && !uploadedImage) || loading || paidLoading) return;
+    if (Number(apayBalance) <= 0) {
+      setError(`Insufficient $APAY Balance: Your wallet currently has ${apayBalance} APAY. You need $APAY tokens on BotChain to pay for image services. Please top up your wallet.`);
+      return;
+    }
     setLoading(true);
     setResult(null);
     setError(null);

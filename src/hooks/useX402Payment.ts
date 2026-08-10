@@ -375,6 +375,34 @@ async function signEip3009Authorization(
     );
   }
 
+  // ★ On-Chain Balance Check — Stop immediately if user balance < required APAY amount
+  const publicClient = createPublicClient({
+    chain: target.chain,
+    transport: http(),
+  });
+  const userBalance = await publicClient.readContract({
+    address: accept.asset,
+    abi: [
+      {
+        name: "balanceOf",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "account", type: "address" }],
+        outputs: [{ type: "uint256" }],
+      },
+    ] as const,
+    functionName: "balanceOf",
+    args: [account],
+  });
+  const requiredValue = BigInt(accept.amount ?? "0");
+  if (userBalance < requiredValue) {
+    const userFormatted = formatApayAmount(userBalance.toString());
+    const reqFormatted = formatApayAmount(requiredValue.toString());
+    throw new Error(
+      `Insufficient $APAY Balance: Wallet has ${userFormatted} APAY, but ${reqFormatted} APAY is required to pay for this prompt. Please top up your wallet.`
+    );
+  }
+
   // Random 32-byte nonce
   const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
   const nonce =

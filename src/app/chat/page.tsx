@@ -8,7 +8,7 @@ import { useBackendWarmup } from "@/hooks/useBackendWarmup";
 import { useCanSwitchNetwork } from "@/hooks/useCanSwitchNetwork";
 import { BalanceBar } from "@/components/BalanceBar";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
-import { Bot, Send, Sparkles, Loader2, ArrowLeft, User, Wallet, Cpu } from "lucide-react";
+import { Bot, Send, Sparkles, Loader2, ArrowLeft, User, Wallet, Cpu, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 import { useApayPrice } from "@/hooks/useApayPrice";
@@ -57,6 +57,19 @@ export default function ChatPage() {
 
   async function handleSend() {
     if (!prompt.trim() || loading || paidLoading) return;
+    if (Number(apayBalance) <= 0) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `error-${Date.now()}`,
+          sender: "ai",
+          text: `Insufficient $APAY Balance: Your wallet currently has ${apayBalance} APAY. You need $APAY tokens on BotChain to pay for AI prompts. Please top up your wallet.`,
+          isError: true,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
+      ]);
+      return;
+    }
     const userPrompt = prompt.trim();
     const activeProvider = provider;
     setPrompt("");
@@ -214,6 +227,15 @@ export default function ChatPage() {
           <div className="bg-emerald-950/40 border border-emerald-800/80 text-emerald-300 rounded-xl p-3 text-xs flex items-center space-x-2 animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
             <span>🔍 Authorization signed! Verifying payment with BOF Facilitator...</span>
+          </div>
+        )}
+
+        {address && Number(apayBalance) <= 0 && (
+          <div className="bg-amber-950/60 border border-amber-800 text-amber-300 rounded-xl p-3 text-xs flex items-center space-x-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <span>
+              <strong>Insufficient $APAY Balance:</strong> Your wallet has {apayBalance} APAY. You need $APAY tokens on BotChain to pay for AI prompts.
+            </span>
           </div>
         )}
 

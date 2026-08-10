@@ -178,6 +178,10 @@ export default function CodePage() {
 
   async function handleAudit() {
     if (!codeSnippet.trim() || loading || paidLoading) return;
+    if (Number(apayBalance) <= 0) {
+      setError(`Insufficient $APAY Balance: Your wallet currently has ${apayBalance} APAY. You need $APAY tokens on BotChain to pay for code security audits. Please top up your wallet.`);
+      return;
+    }
     setLoading(true);
     setAuditResult(null);
     setError(null);
