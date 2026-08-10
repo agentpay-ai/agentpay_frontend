@@ -1,5 +1,5 @@
 export const TOKENS = {
-  // BotChain Mainnet (Chain ID: 677) - Set via env vars when deployed
+  // BotChain Mainnet (Chain ID: 677)
   botChainMainnet: {
     APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
     USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
@@ -7,8 +7,8 @@ export const TOKENS = {
   },
   // BotChain Testnet / Devnet (Chain ID: 968)
   botChainTestnet: {
-    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_TESTNET || "0xFd7bF688d5a772A81DfE39da502F69FD99cE92c7") as `0x${string}`,
-    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_TESTNET || "0x75edC9335175Fc0552D51D48439F229c10420fe3") as `0x${string}`,
+    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_TESTNET || "") as `0x${string}`,
+    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_TESTNET || "") as `0x${string}`,
   },
 };
 
