@@ -1,14 +1,14 @@
 export const TOKENS = {
   // BotChain Mainnet (Chain ID: 677)
   botChainMainnet: {
-    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
-    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
+    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_MAINNET || "0x4a781889Ce38c08B86b02e084A5A19609376b857") as `0x${string}`,
+    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_MAINNET || "0xaBabc7Ddc03e501d190C676BF3d92ef0e6e87a3C") as `0x${string}`,
     BOUSDT: (process.env.NEXT_PUBLIC_BOUSDT_TOKEN_ADDRESS_MAINNET || "") as `0x${string}`,
   },
   // BotChain Testnet / Devnet (Chain ID: 968)
   botChainTestnet: {
-    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_TESTNET || "") as `0x${string}`,
-    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_TESTNET || "") as `0x${string}`,
+    APAY: (process.env.NEXT_PUBLIC_APAY_TOKEN_ADDRESS_TESTNET || "0xFd7bF688d5a772A81DfE39da502F69FD99cE92c7") as `0x${string}`,
+    USDT: (process.env.NEXT_PUBLIC_USDT_TOKEN_ADDRESS_TESTNET || "0x75edC9335175Fc0552D51D48439F229c10420fe3") as `0x${string}`,
   },
 };
 
@@ -33,6 +33,26 @@ export const ERC20_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ type: "string" }],
+  },
+  {
+    name: "allowance",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "approve",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ type: "bool" }],
   },
   {
     name: "transfer",

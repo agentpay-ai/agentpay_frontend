@@ -8,7 +8,7 @@ import { useApayPrice } from "@/hooks/useApayPrice";
 import { BalanceBar } from "@/components/BalanceBar";
 import { AgentIdentityBadge } from "@/components/AgentIdentityBadge";
 import { FeedbackModal } from "@/components/FeedbackModal";
-import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star, Cpu } from "lucide-react";
+import { Bot, Image as ImageIcon, Code, Sparkles, Smartphone, CheckCircle, Star, Cpu, Coins } from "lucide-react";
 
 export default function Home() {
   const {
@@ -195,6 +195,33 @@ export default function Home() {
                 </span>
                 <span className="text-[10px] text-slate-500 mt-0.5 block">
                   ~{codeApay.toFixed(2)} APAY
+                </span>
+              </div>
+            </Link>
+
+            {/* DEX & Liquidity Hub */}
+            <Link
+              href="/dex"
+              className="bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-slate-900 border border-amber-500/30 hover:border-amber-400/50 p-4 rounded-xl transition cursor-pointer flex items-center justify-between group shadow-md"
+            >
+              <div className="flex items-center space-x-3.5">
+                <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30 group-hover:scale-105 transition">
+                  <Coins className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-sm flex items-center space-x-1.5">
+                    <span>DEX &amp; Liquidity Hub</span>
+                    <span className="text-[9px] bg-amber-400/20 text-amber-400 font-bold px-1.5 py-0.5 rounded">NEW</span>
+                  </h3>
+                  <p className="text-xs text-slate-400">Swap APAY &amp; 1-Click Zap Liquidity</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-bold bg-amber-500/20 text-amber-300 px-2.5 py-1 rounded-lg border border-amber-500/30 block">
+                  0.30% Fee
+                </span>
+                <span className="text-[10px] text-emerald-400 mt-0.5 block font-medium">
+                  Auto-Mint Active
                 </span>
               </div>
             </Link>
